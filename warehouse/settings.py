@@ -2,30 +2,28 @@ from pathlib import Path
 import os
 import dj_database_url
 import psycopg2
-import django_heroku
-
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-dotenv_file = os.path.join(BASE_DIR, ".env")
-
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ['SECRET_KEY']
 DEBUG = os.environ.get('DJANGO_ENV') == 'development'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('D_MODE', 'True').lower() == 'True'
 
 ALLOWED_HOSTS = ['warehouse-lmvk.onrender.com', 'localhost', '127.0.0.1']
 
 STATIC_URL = '/static/'
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+if DEBUG:
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+else:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -78,13 +76,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'warehouse.wsgi.application'
 
 DATABASES = {
-    'default': dj_database_url.config(
-        # Replace this value with your local database's connection string.
-        default=os.environ['DATABASE_URL'],
+  'default': dj_database_url.config(
+        default='postgresql://warehouseuser:gallery123@localhost:5432/warehouse',
         conn_max_age=600
     )
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -101,7 +97,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -110,10 +105,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -126,7 +118,6 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
-
 AUTH_USER_MODEL='users.User'
 
 DJOSER = {
@@ -137,7 +128,5 @@ DJOSER = {
         'user': 'users.serializers.UserCreateSerializer'
     }
 }
-
-
 
 CORS_ALLOW_ALL_ORIGINS = True 
