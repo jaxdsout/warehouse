@@ -1,9 +1,13 @@
 from django.db import models
 from django.utils import timezone
 import datetime
+import os
 
 def upload_to(instance, filename):
-    return 'items/{filename}'.format(filename=filename)
+    return os.path.join('static', 'items', filename)
+
+def upload_to_event(instance, filename):
+    return os.path.join('static', 'events', filename)
 
 class Creator(models.Model):
     ROLES = [
@@ -37,7 +41,7 @@ class Item (models.Model):
     listing_end = models.DateField(blank=True)
     current_price = models.IntegerField(default=0)
     starting_price = models.IntegerField(default=1)
-    image = models.ImageField(upload_to=upload_to, default='default.jpg', null=True, blank=True)
+    image = models.ImageField(upload_to=upload_to, null=True, blank=True)
     creator = models.ForeignKey(Creator, on_delete=models.CASCADE, related_name='items')
 
     def __str__(self):
@@ -62,10 +66,9 @@ class Bid (models.Model):
 class Event (models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(max_length=1000)
-    poster = models.ImageField(upload_to=upload_to, default='default.jpg', null=True, blank=True)
+    poster = models.ImageField(upload_to=upload_to_event, null=True, blank=True)
     time = models.DateTimeField(blank=True)
     creator = models.ForeignKey(Creator, on_delete=models.CASCADE, related_name='events', null=True, blank=True)
-
 
     def __str__(self):
         return self.title

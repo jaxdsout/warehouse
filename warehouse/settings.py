@@ -9,14 +9,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ['SECRET_KEY']
 DEBUG = os.environ.get('DJANGO_ENV') == 'development'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('D_MODE', 'True').lower() == 'True'
-
 ALLOWED_HOSTS = ['warehouse-lmvk.onrender.com', 'localhost', '127.0.0.1']
 
 STATIC_URL = '/static/'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 if DEBUG:
     STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
