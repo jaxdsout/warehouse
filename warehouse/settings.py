@@ -2,23 +2,23 @@ from pathlib import Path
 import os
 import dj_database_url
 import psycopg2
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['SECRET_KEY']
-DEBUG = os.environ.get('DJANGO_ENV') == 'development'
+SECRET_KEY = os.getenv('SECRET_KEY')
+DEBUG = os.getenv('DEBUG')
 
 ALLOWED_HOSTS = ['warehouse-lmvk.onrender.com', 'localhost', '127.0.0.1']
 
 STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
 
-if DEBUG:
-    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-else:
-    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -27,15 +27,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users',
+    'inventory',
     'corsheaders',
     'djoser',
-    'inventory',
-    'users',
     'gunicorn',
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
-    'whitenoise'
+    'whitenoise',
+    'storages'
 ]
 
 MIDDLEWARE = [
@@ -72,7 +73,7 @@ WSGI_APPLICATION = 'warehouse.wsgi.application'
 
 DATABASES = {
   'default': dj_database_url.config(
-        default='postgresql://warehouseuser:gallery123@localhost:5432/warehouse',
+        default=os.getenv('DATABASE_URL'),
         conn_max_age=600
     )
 }
@@ -122,6 +123,21 @@ DJOSER = {
         'user_create': 'users.serializers.UserCreateSerializer',
         'user': 'users.serializers.UserCreateSerializer'
     }
+}
+
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+AWS_S3_FILE_OVERWRITE = False
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3StaticStorage"
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3boto3.S3StaticStorage"
+    },
 }
 
 CORS_ALLOW_ALL_ORIGINS = True 
